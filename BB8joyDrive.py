@@ -93,7 +93,7 @@ def draw_axis(surface, x, y, axis_x, axis_y, size):
     # Convert to degrees
     joystickAngleDegrees *= 180.0 / math.pi
 
-    speed = int(mapRange(joystickDistanceFromCenter, 0.0, 1.0, 0, 255))
+    speed = int(mapRange(joystickDistanceFromCenter / 5, 0.0, 1.0, 0, 255))
     heading = int(joystickAngleDegrees)
 
     sendRollCommand(speed, heading)
@@ -150,8 +150,8 @@ while True:
 
     # Draw all the axes (analog sticks)
     x = 0
-    axis_x = joystick.get_axis(0)
-    axis_y = joystick.get_axis(1)
+    axis_x = joystick.get_axis(1)
+    axis_y = (-1) * joystick.get_axis(0)
 
 
 

@@ -241,7 +241,7 @@ class Sphero(threading.Thread):
         self.target_name = target_name
         self.bt = None
         # Use "sudo hcitool lescan" to find BB8's MAC address input it at deviceAddress = 
-        self.deviceAddress = 'DF:79:DD:9C:B6:1D'
+        self.deviceAddress = 'DC:4F:98:30:BE:2C'
         self.shutdown = False
         self.is_connected = False
         self.mask_list = None
