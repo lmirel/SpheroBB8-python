@@ -7,6 +7,7 @@ import struct
 import BB8_driver
 
 bb8 = BB8_driver.Sphero()
+print 'going online..'
 bb8.connect()
 
 
@@ -22,6 +23,9 @@ pygame.joystick.Joystick(0).init()
 bb8.set_rgb_led(0, 0, 0, 0, False)
 
 bb8.set_rotation_rate(1, False)
+
+bb8.set_stablization (1, False)
+print 'ready!'
 
 clock = pygame.time.Clock()
 
@@ -93,24 +97,27 @@ def draw_axis(surface, x, y, axis_x, axis_y, size):
     # Convert to degrees
     joystickAngleDegrees *= 180.0 / math.pi
 
-    speed = int(mapRange(joystickDistanceFromCenter / 5, 0.0, 1.0, 0, 255))
+    speed = int(mapRange(joystickDistanceFromCenter / 4, 0.0, 1.0, 0, 255))
     heading = int(joystickAngleDegrees)
 
-    sendRollCommand(speed, heading)
 
     
-    if joystick.get_button(6):
-        bb8.roll(0, heading, 0, False)
-
-    if joystick.get_button(4) == 1:
-        bb8.set_heading(0, False)
+    if joystick.get_button(6) == 1:
+	speed = 0
 
     if joystick.get_button(5) == 1:
         bb8.set_back_led(255, False)
+        bb8.set_heading(heading, False)
+	speed = 0
 
     if joystick.get_button(5) == 0:
         bb8.set_back_led(0, False)
 
+#    sendRollCommand(speed, heading)
+    if speed > 0:
+        bb8.roll(speed, heading, 1, False)
+    else:
+        bb8.roll(0, heading, 0, False)
 
     # Displays the joystick X & Y coordinates to screen
     message = "X: {}  Y: {} Speed: {} Heading: {}".format(draw_x, draw_y, speed, heading)
@@ -127,36 +134,41 @@ def draw_axis(surface, x, y, axis_x, axis_y, size):
     pygame.draw.circle(surface, (134, 179, 0), draw_pos, 10)
 
 
-while True:
-    clock.tick(10)
+try:
+    while True:
+	clock.tick(10)
 
-    joystick = pygame.joystick.Joystick(0)
+	joystick = pygame.joystick.Joystick(0)
 
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            exit()
+	for event in pygame.event.get():
+    	    if event.type == QUIT:
+        	pygame.quit()
+		bb8.disconnect()
+        	exit()
 
-    if event.type == KEYDOWN:
-        if event.key >= K_0 and event.key <= K_1:
-            num = event.key - K_0
+        if event.type == KEYDOWN:
+	    if event.key >= K_0 and event.key <= K_1:
+    	        num = event.key - K_0
 
+	# axis_size = min(256, 640 / (joystick.get_numaxes()/2))
+	axis_size = min(256, 256)
 
-    # axis_size = min(256, 640 / (joystick.get_numaxes()/2))
-    axis_size = min(256, 256)
+	#    pygame.draw.rect(screen, (255, 255, 255), (0, 0, 256, 275))
+	pygame.draw.rect(screen, (38, 38, 38), (0, 0, 256, 275))
 
-    #    pygame.draw.rect(screen, (255, 255, 255), (0, 0, 256, 275))
-    pygame.draw.rect(screen, (38, 38, 38), (0, 0, 256, 275))
+	# Draw all the axes (analog sticks)
+	x = 0
+	axis_x = joystick.get_axis(0)
+	axis_y = joystick.get_axis(1)
 
-    # Draw all the axes (analog sticks)
-    x = 0
-    axis_x = joystick.get_axis(1)
-    axis_y = (-1) * joystick.get_axis(0)
-
-
-
-    draw_axis(screen, x, 0, axis_x, axis_y, axis_size)
-    x += axis_size
+	draw_axis(screen, x, 0, axis_x, axis_y, axis_size)
+	x += axis_size
     
+	pygame.display.update()
 
-    pygame.display.update()
+except KeyboardInterrupt: # trap a CTRL+C keyboard interrupt
+    print 'going offline..'
+    pygame.quit()
+#    bb8.go_to_sleep (0, 0, False)
+    bb8.disconnect ()
+    exit()
